@@ -1,0 +1,1 @@
+fuse-ext2 system_new.img /mnt/fuse/ext4 -o rw+,uid=1000,gid=1000,allow_other
