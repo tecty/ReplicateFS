@@ -18,8 +18,8 @@ class Memory(FUSELL):
         return self.ino
 
     def init(self, userdata, conn):
-        self.ino =1 
-        self.attr = defaultdict(dict);
+        self.ino = 1
+        self.attr = defaultdict(dict)
         self.data = defaultdict(bytes)
         self.parent = {}
         self.children = defaultdict(dict)
@@ -31,15 +31,13 @@ class Memory(FUSELL):
         }
         self.parent[1] = 1
 
-
     def getattr(self, req, ino, fi):
+        print('getattr:', ino)
         attr = self.attr[ino]
-        if attr: 
+        if attr:
             self.reply_attr(req, attr, 1.0)
-        else: 
-            self.reply_attr(req, ENOENT)
-
-
+        else:
+            self.reply_err(req, ENOENT)
 
     def lookup(self, req, parent, name):
         print('lookup:', parent, name)
@@ -48,45 +46,76 @@ class Memory(FUSELL):
         attr = self.attr[ino]
 
         if attr:
-            entry = {
-                'ino':ino,
-                'attr':attr,
-                'attr_timeout':1.0,
-                'entry_timeout':1.0
-            }
+            entry = dict(
+                ino=ino,
+                attr=attr,
+                attr_timeout=1.0,
+                entry_timeout=1.0)
             self.reply_entry(req, entry)
         else:
             self.reply_err(req, ENOENT)
 
-    def mkdir(self, req, parent, name, mode, rdev):
+    def mkdir(self, req, parent, name, mode):
+        print('mkdir:', parent, name)
         ino = self.create_ino()
         ctx = self.req_ctx(req)
         now = time()
         attr = {
-            'st_ino': ino,
-            'st_mode': mode,
-            'st_nlink': 1, 
-            'st_uid': ctx['gid'],
-            'st_rdev': rdev, 
+            'st_ino':ino,
+            'st_mode':S_IFDIR | mode,
+            'st_nlink':2,
+            'st_uid':ctx['uid'],
+            'st_gid':ctx['gid'],
             'st_atime':now,
-            'st_mtime':now, 
-            'st_ctime': now
+            'st_mtime':now,
+            'st_ctime':now
         }
 
         self.attr[ino] = attr
         self.attr[parent]['st_nlink'] += 1
-        self.children[parent][name] = ino 
+        self.parent[ino] = parent
+        self.children[parent][name] = ino
 
-        entry=  { 
-            'ino' : ino, 
-            'attr': attr, 
-            'attr_timeout': 1.0,
+        entry = {
+
+            'ino':ino,
+            'attr':attr,
+            'attr_timeout':1.0,
             'entry_timeout':1.0
         }
-        self.reply_entry (req, entry)
+        self.reply_entry(req, entry)
 
-    def open(self, req, ino, fi): 
-        print('open', ino)
+    def mknod(self, req, parent, name, mode, rdev):
+        print('mknod:', parent, name)
+        ino = self.create_ino()
+        ctx = self.req_ctx(req)
+        now = time()
+        attr = {
+            'st_ino':ino,
+            'st_mode':mode,
+            'st_nlink':1,
+            'st_uid':ctx['uid'],
+            'st_gid':ctx['gid'],
+            'st_rdev':rdev,
+            'st_atime':now,
+            'st_mtime':now,
+            'st_ctime':now
+        }
+
+        self.attr[ino] = attr
+        self.attr[parent]['st_nlink'] += 1
+        self.children[parent][name] = ino
+
+        entry = {
+            'ino':ino,
+            'attr':attr,
+            'attr_timeout':1.0,
+            'entry_timeout':1.0
+        }
+        self.reply_entry(req, entry)
+
+    def open(self, req, ino, fi):
+        print('open:', ino)
         self.reply_open(req, fi)
 
     def read(self, req, ino, size, off, fi):
@@ -128,6 +157,7 @@ class Memory(FUSELL):
         self.data[ino] = self.data[ino][:off] + buf
         self.attr[ino]['st_size'] = len(self.data[ino])
         self.reply_write(req, len(buf))
+
 
 
 if __name__ == '__main__':
