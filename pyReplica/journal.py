@@ -1,5 +1,7 @@
 #!/usr/bin/env python 
 import time
+import json 
+
 
 S_RUNNING = 1
 S_LOCKED = 2
@@ -22,19 +24,63 @@ class Journal(object):
     def __init__(self, ops, data):
         self.state = S_RUNNING
         self.ops = ops 
+        # get the correspond callback 
+        self.callback = Journal.getCallback(ops);
         self.data = data 
+
 
     def toLocked(self):
         self.state = S_LOCKED
 
     def toFlush(self):
         self.state = S_FLUSH
+        # do the callback and store the result in some where 
+        self.res = self.callback(self.data)
+        # callback is finished 
+        self.toCommit()
 
     def toCommit(self):
         self.state = S_COMMIT
 
     def toFinished(self):
         self.state = S_FINISHED
+        # return back the callback's result 
+        return self.res
+
+    def toJson(self):
+        json.dumps({
+            'ops':self.ops,
+            'data': self.data
+        })
+
+    @classmethod
+    def getCallback(cls, ops):
+        if ops == 'chmod':
+            pass
+        elif ops == 'chown':
+            pass
+        elif ops == 'Mknod':
+            pass
+        elif ops == 'Rmdir':
+            pass
+        elif ops == 'Mkdir':
+            pass
+        elif ops == 'Unlink':
+            pass
+        elif ops == 'Symlink':
+            pass
+        elif ops == 'Rename':
+            pass
+        elif ops == 'link':
+            pass
+        elif ops == 'writting':
+            pass
+        elif ops == 'truncate':
+            pass
+        elif ops == 'fulsh':
+            pass
+        elif ops == 'fsync':
+            pass
 
 
 class JournalController(object):

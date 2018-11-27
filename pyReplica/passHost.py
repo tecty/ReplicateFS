@@ -6,7 +6,11 @@ import os
 import sys
 import errno
 
+
 from fuse import FUSE, FuseOSError, Operations
+from journal import Journal
+
+
 
 
 class Passthrough(Operations):
@@ -137,6 +141,7 @@ class Passthrough(Operations):
 
     def fsync(self, path, fdatasync, fh):
         print("fsync to", path)
+        Journal('fsync', {'path': path})
         return self.flush(path, fh)
 
 
