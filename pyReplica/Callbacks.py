@@ -14,7 +14,7 @@ def dump_data(data):
 
 def do_chmod(data):
     """
-    data.path and data.mode
+    data['path'] and data['mode']
     """
     print (Constants.PATH)
 
@@ -24,85 +24,85 @@ def do_chmod(data):
 
 def do_chown(data):
     """
-    data.path
-    data.uid
-    data.gid
+    data['path']
+    data['uid']
+    data['gid']
     """
-    return os.chown(get_full_path(data.path), data.uid, data.gid)
+    return os.chown(get_full_path(data['path']), data['uid'], data['gid'])
 
 def do_mknod(data):
     """
-    data.path
-    data.mode 
-    data.dev 
+    data['path']
+    data['mode'] 
+    data['dev'] 
     """
-    return os.mknod(get_full_path(data.path),data.mode,data.dev)
+    return os.mknod(get_full_path(data['path']),data['mode'],data['dev'])
 
 def do_rmdir(data):
     """
-    data.path
+    data['path']
     """
-    return os.rmdir(get_full_path(data.path))
+    return os.rmdir(get_full_path(data['path']))
 def do_mkdir(data):
     """
-    data.path
-    data.mode
+    data['path']
+    data['mode']
     """
-    return os.mkdir(data.path, data.mode)
+    return os.mkdir(data['path'], data['mode'])
 def do_unlink(data):
     """
-    data.path
+    data['path']
     """
-    return os.unlink(get_full_path(data.path))
+    return os.unlink(get_full_path(data['path']))
 def do_symlink(data):
     """
-    data.path
+    data['path']
     """
-    return os.symlink(get_full_path(data.path))
+    return os.symlink(get_full_path(data['path']))
 def do_rename(data):
     """
-    data.old
-    data.new
+    data['old']
+    data['new']
     """
     return os.rename(
-        get_full_path(data.old),
-        get_full_path(data.new)
+        get_full_path(data['old']),
+        get_full_path(data['new'])
     )
 def do_link(data):
     """
     data.
     """
     return os.link(
-        get_full_path(data.target),
-        get_full_path(data.name)
+        get_full_path(data['target']),
+        get_full_path(data['name'])
     )
 def do_write(data):
     """
-    data.fh
-    data.offset
-    data.SEEK_SET
-    data.buf 
-    data.fh
+    data['fh']
+    data['offset']
+    data['SEEK_SET']
+    data['buf'] 
+    data['fh']
     """
-    os.lseek(data.fh, data.offset, data.SEEK_SET)
+    os.lseek(data['fh'], data['offset'], data['SEEK_SET'])
     #! buf, fh may not be a string 
-    return os.write(data.fh, data.buf)
+    return os.write(data['fh'], data['buf'])
 def do_truncate(data):
     """
-    data.path 
-    data.length 
+    data['path'] 
+    data['length'] 
     """
-    with open(get_full_path(data.path)) as f: 
-        return f.truncate(data.length)
+    with open(get_full_path(data['path'])) as f: 
+        return f.truncate(data['length'])
     return False
     
 def do_fulsh(data):
     """
-    data.path
-    data.fh
+    data['path']
+    data['fh']
     """
     #! the FH may not be the string
-    return os.fsync(data.fh)
+    return os.fsync(data['fh'])
 
 # the mappings 
 Callbacks = {
