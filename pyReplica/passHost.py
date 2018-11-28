@@ -11,6 +11,8 @@ from fuse import FUSE, FuseOSError, Operations
 from Journal import Journal
 import Constants
 
+from Callbacks import Callbacks as cb 
+
 
 
 class Passthrough(Operations):
@@ -40,7 +42,12 @@ class Passthrough(Operations):
     def chmod(self, path, mode):
         print("Chmod at ", path, "to mode ", mode)
         full_path = self._full_path(path)
-        return os.chmod(full_path, mode)
+        print("full path is ", full_path)
+        return cb[Constants.J_CHMOD]({
+            'path': path, 
+            'mode': mode
+        })
+        # return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
         print("Chown at", path, "uid:", uid, "gid", gid)

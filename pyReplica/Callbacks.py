@@ -1,15 +1,23 @@
 import Constants
 import os 
+import json 
 
 def get_full_path(partial):
-    if partial.startswith("/"):
-        partial = partial[1:]
-    return os.path.join(Constants.path, partial)
+    # if partial.startswith("/"):
+    #     partial = partial[1:]
+    return os.path.join(Constants.PATH, partial)
+
+def dump_data(data):
+    print (json.dumps(data))
 
 def do_chmod(data):
     """
     data.path and data.mode
     """
+    print( get_full_path(data.path))
+
+    dump_data(data)
+
     return os.chmod(get_full_path(data.path), data.mode)
 
 def do_chown(data):
