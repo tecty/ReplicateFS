@@ -1,13 +1,7 @@
 #!/usr/bin/env python 
 import time
 import json 
-
-
-S_RUNNING = 1
-S_LOCKED = 2
-S_FLUSH = 3
-S_COMMIT = 4 
-S_FINISHED = 5
+import Constants
 
 def doJournal(journal,mount_path):
     '''
@@ -22,28 +16,27 @@ def doJournal(journal,mount_path):
 
 class Journal(object):
     def __init__(self, ops, data):
-        self.state = S_RUNNING
+        self.state = Constants.S_RUNNING
         self.ops = ops 
         # get the correspond callback 
-        self.callback = Journal.getCallback(ops);
         self.data = data 
-
+        self.res =""
 
     def toLocked(self):
-        self.state = S_LOCKED
+        self.state = Constants.S_LOCKED
 
     def toFlush(self):
-        self.state = S_FLUSH
+        self.state = Constants.S_FLUSH
         # do the callback and store the result in some where 
-        self.res = self.callback(self.data)
+        # self.res = self.callback(self.data)
         # callback is finished 
         self.toCommit()
 
     def toCommit(self):
-        self.state = S_COMMIT
+        self.state = Constants.S_COMMIT
 
     def toFinished(self):
-        self.state = S_FINISHED
+        self.state = Constants.S_FINISHED
         # return back the callback's result 
         return self.res
 
@@ -52,36 +45,7 @@ class Journal(object):
             'ops':self.ops,
             'data': self.data
         })
-
-    @classmethod
-    def getCallback(cls, ops):
-        if ops == 'chmod':
-            pass
-        elif ops == 'chown':
-            pass
-        elif ops == 'Mknod':
-            pass
-        elif ops == 'Rmdir':
-            pass
-        elif ops == 'Mkdir':
-            pass
-        elif ops == 'Unlink':
-            pass
-        elif ops == 'Symlink':
-            pass
-        elif ops == 'Rename':
-            pass
-        elif ops == 'link':
-            pass
-        elif ops == 'writting':
-            pass
-        elif ops == 'truncate':
-            pass
-        elif ops == 'fulsh':
-            pass
-        elif ops == 'fsync':
-            pass
-
+        
 
 class JournalController(object):
     def __init__(self, mount_path):
@@ -107,7 +71,7 @@ class JournalController(object):
         j = self.journalDict[id]
         # commit finished 
         # lock, wait the Tr to finish
-        while j.state != S_COMMIT:
+        while j.state != Constants.S_COMMIT:
             time.sleep(5)
         j.toFinished()
         return j

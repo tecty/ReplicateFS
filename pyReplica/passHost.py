@@ -8,13 +8,16 @@ import errno
 
 
 from fuse import FUSE, FuseOSError, Operations
-from journal import Journal
-
+from Journal import Journal
+import Constants
 
 
 
 class Passthrough(Operations):
     def __init__(self, root):
+        # setup as a path constant in constant 
+        Constants.PATH = root
+
         self.root = root
 
     # Helpers
@@ -35,12 +38,12 @@ class Passthrough(Operations):
             raise FuseOSError(errno.EACCES)
 
     def chmod(self, path, mode):
-        print("chmod at ", path, "to mode ", mode)
+        print("Chmod at ", path, "to mode ", mode)
         full_path = self._full_path(path)
         return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
-        print("chown at", path, "uid:", uid, "gid", gid)
+        print("Chown at", path, "uid:", uid, "gid", gid)
         full_path = self._full_path(path)
         return os.chown(full_path, uid, gid)
 
@@ -68,13 +71,14 @@ class Passthrough(Operations):
             return pathname
 
     def mknod(self, path, mode, dev):
+        path = self._full_path(path)
         print("Mknod at ",path)
-        return os.mknod(self._full_path(path), mode, dev)
+        return os.mknod(path, mode, dev)
 
     def rmdir(self, path):
+        path = self._full_path(path)
         print("Rmdir at ",path)
-        full_path = self._full_path(path)
-        return os.rmdir(full_path)
+        return os.rmdir(path)
 
     def mkdir(self, path, mode):
         print("Mkdir at ",path)
@@ -100,7 +104,7 @@ class Passthrough(Operations):
         return os.rename(self._full_path(old), self._full_path(new))
 
     def link(self, target, name):
-        print("link to", target)
+        print("Link to", target)
         return os.link(self._full_path(target), self._full_path(name))
 
     def utimens(self, path, times=None):
@@ -122,26 +126,26 @@ class Passthrough(Operations):
         return os.read(fh, length)
 
     def write(self, path, buf, offset, fh):
-        print("writting to", path)
+        print("Write to", path)
         os.lseek(fh, offset, os.SEEK_SET)
         return os.write(fh, buf)
 
     def truncate(self, path, length, fh=None):
-        print("truncate to", path)
+        print("Truncate to", path)
         full_path = self._full_path(path)
         with open(full_path, 'r+') as f:
             f.truncate(length)
 
     def flush(self, path, fh):
-        print("fulsh to", path)
+        print("Fulsh to", path)
         return os.fsync(fh)
 
     def release(self, path, fh):
         return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
-        print("fsync to", path)
-        Journal('fsync', {'path': path})
+        print("Fsync to", path)
+        Journal(Constants.J_CHMOD, {'path': path})
         return self.flush(path, fh)
 
 
@@ -149,4 +153,9 @@ def main(mountpoint, root):
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
 
 if __name__ == '__main__':
-    main(sys.argv[2], sys.argv[1])
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('mount')
+    parser.add_argument('root')
+    args = parser.parse_args()
+    main(args.mount, args.root)
