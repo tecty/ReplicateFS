@@ -20,6 +20,7 @@ def do_chmod(data):
 
     dump_data(data)
 
+    dump_data(data)
     return os.chmod(get_full_path(data['path']), data['mode'])
 
 def do_chown(data):
@@ -28,6 +29,7 @@ def do_chown(data):
     data['uid']
     data['gid']
     """
+    dump_data(data)
     return os.chown(get_full_path(data['path']), data['uid'], data['gid'])
 
 def do_mknod(data):
@@ -36,42 +38,54 @@ def do_mknod(data):
     data['mode'] 
     data['dev'] 
     """
+    dump_data(data)
     return os.mknod(get_full_path(data['path']),data['mode'],data['dev'])
 
 def do_rmdir(data):
     """
     data['path']
     """
+    dump_data(data)
     return os.rmdir(get_full_path(data['path']))
 def do_mkdir(data):
     """
     data['path']
     data['mode']
     """
+    dump_data(data)
     return os.mkdir(data['path'], data['mode'])
 def do_unlink(data):
     """
     data['path']
     """
+    dump_data(data)
     return os.unlink(get_full_path(data['path']))
 def do_symlink(data):
     """
-    data['path']
+    data['src']
+    data['dest']
     """
-    return os.symlink(get_full_path(data['path']))
+    dump_data(data)
+    return os.symlink(
+        data['src'],
+        get_full_path(data['dest'])
+    )
 def do_rename(data):
     """
     data['old']
     data['new']
     """
+    dump_data(data)
     return os.rename(
         get_full_path(data['old']),
         get_full_path(data['new'])
     )
 def do_link(data):
     """
-    data.
+    data['target']
+    data['name']
     """
+    dump_data(data)
     return os.link(
         get_full_path(data['target']),
         get_full_path(data['name'])
@@ -80,18 +94,20 @@ def do_write(data):
     """
     data['fh']
     data['offset']
+    data['path']
     data['SEEK_SET']
     data['buf'] 
-    data['fh']
     """
     os.lseek(data['fh'], data['offset'], data['SEEK_SET'])
     #! buf, fh may not be a string 
+    dump_data(data)
     return os.write(data['fh'], data['buf'])
 def do_truncate(data):
     """
     data['path'] 
     data['length'] 
     """
+    dump_data(data)
     with open(get_full_path(data['path'])) as f: 
         return f.truncate(data['length'])
     return False
@@ -102,6 +118,7 @@ def do_fulsh(data):
     data['fh']
     """
     #! the FH may not be the string
+    dump_data(data)
     return os.fsync(data['fh'])
 
 # the mappings 

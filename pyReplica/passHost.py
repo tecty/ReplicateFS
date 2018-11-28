@@ -43,16 +43,23 @@ class Passthrough(Operations):
         print("Chmod at ", path, "to mode ", mode)
         full_path = self._full_path(path)
         print("full path is ", full_path)
+        
+        # return os.chmod(full_path, mode)
         return cb[Constants.J_CHMOD]({
             'path': str(path), 
             'mode': mode
         })
-        # return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
         print("Chown at", path, "uid:", uid, "gid", gid)
-        full_path = self._full_path(path)
-        return os.chown(full_path, uid, gid)
+        # full_path = self._full_path(path)
+        # return os.chown(full_path, uid, gid)
+        return cb[Constants.J_CHOWN]({
+            'path': str(path),
+            'uid': uid,
+            'gid': gid
+        })
+
 
     def getattr(self, path, fh=None):
         full_path = self._full_path(path)
@@ -78,18 +85,30 @@ class Passthrough(Operations):
             return pathname
 
     def mknod(self, path, mode, dev):
-        path = self._full_path(path)
+        # path = self._full_path(path)
         print("Mknod at ",path)
-        return os.mknod(path, mode, dev)
+        # return os.mknod(path, mode, dev)
+        return cb[Constants.J_MKNOD]({
+            'path': path,
+            'mode': mode,
+            'dev': dev 
+        })
 
     def rmdir(self, path):
         path = self._full_path(path)
         print("Rmdir at ",path)
-        return os.rmdir(path)
+        # return os.rmdir(path)
+        return cb[Constants.J_RMDIR]({
+            'path': str(path)
+        })
 
     def mkdir(self, path, mode):
         print("Mkdir at ",path)
-        return os.mkdir(self._full_path(path), mode)
+        # return os.mkdir(self._full_path(path), mode)
+        return cb[Constants.J_MKDIR]({
+            'path': path,
+            'mode': mode
+        })
 
     def statfs(self, path):
         full_path = self._full_path(path)
@@ -100,19 +119,37 @@ class Passthrough(Operations):
 
     def unlink(self, path):
         print("Unlink from",path)
-        return os.unlink(self._full_path(path))
+        # return os.unlink(self._full_path(path))
+        return cb[Constants.J_UNLINK]({
+            'path':path
+        })
 
     def symlink(self, name, target):
+        """
+        This method should be deprecate ? 
+        """
         print("Symlink from", name, " to ", target)
-        return os.symlink(name, self._full_path(target))
+        # return os.symlink(name, self._full_path(target))
+        return cb[Constants.J_SYMLINK]({
+            'src': str(name),
+            'dest': str(target)
+        })
 
     def rename(self, old, new):
         print("Rename from", old, " to ", new)
-        return os.rename(self._full_path(old), self._full_path(new))
+        # return os.rename(self._full_path(old), self._full_path(new))
+        return cb[Constants.J_RENAME]({
+            'old': str(old),
+            'new': str(new)
+        })
 
     def link(self, target, name):
         print("Link to", target)
-        return os.link(self._full_path(target), self._full_path(name))
+        # return os.link(self._full_path(target), self._full_path(name))
+        return cb[Constants.J_LINK]({
+            'name': name, 
+            'target': target
+        })
 
     def utimens(self, path, times=None):
         return os.utime(self._full_path(path), times)
@@ -133,27 +170,47 @@ class Passthrough(Operations):
         return os.read(fh, length)
 
     def write(self, path, buf, offset, fh):
+        # this should be more careful 
         print("Write to", path)
         os.lseek(fh, offset, os.SEEK_SET)
-        return os.write(fh, buf)
+        # return os.write(fh, buf)
+        return cb[Constants.J_WRITE]({
+            'fh': fh, 
+            'offset': offset,
+            'path': path,
+            'SEEK_SET':os.SEEK_SET,
+            'buf': buf,
+        })
 
     def truncate(self, path, length, fh=None):
         print("Truncate to", path)
-        full_path = self._full_path(path)
-        with open(full_path, 'r+') as f:
-            f.truncate(length)
+        # full_path = self._full_path(path)
+        # with open(full_path, 'r+') as f:
+        #     f.truncate(length)
+        return cb[Constants.J_TRUNCATE]({
+            'path': path,
+            'length': length
+        })
+
 
     def flush(self, path, fh):
         print("Fulsh to", path)
-        return os.fsync(fh)
+        # return os.fsync(fh)
+        return cb[Constants.J_FULSH]({
+            'path': path,
+            'fh': fh
+        })
 
     def release(self, path, fh):
         return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
         print("Fsync to", path)
-        Journal(Constants.J_CHMOD, {'path': path})
-        return self.flush(path, fh)
+        # return self.flush(path, fh)
+        return cb[Constants.J_FULSH]({
+            'path': path, 
+            'fh': fh
+        })
 
 
 def main(mountpoint, root):
