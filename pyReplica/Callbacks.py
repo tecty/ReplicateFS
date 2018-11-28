@@ -134,5 +134,4 @@ Callbacks = {
     Constants.J_LINK: do_link,
     Constants.J_WRITE: do_write,
     Constants.J_TRUNCATE: do_truncate,
-    Constants.J_FULSH: do_fulsh
 }

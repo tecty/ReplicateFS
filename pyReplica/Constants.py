@@ -22,7 +22,6 @@ J_RENAME = 8
 J_LINK = 9
 J_WRITE = 10
 J_TRUNCATE = 11
-J_FULSH = 12
 
 # Path we need to join 
 PATH = "/"

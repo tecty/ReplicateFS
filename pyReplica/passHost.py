@@ -194,24 +194,16 @@ class Passthrough(Operations):
 
 
     def flush(self, path, fh):
-        print("Fulsh to", path)
-        # return os.fsync(fh)
-        return cb[Constants.J_FULSH]({
-            'path': path,
-            'fh': fh
-        })
+        # use local call, because remote doesn't 
+        # have same fd
+        return os.fsync(fh)
+
 
     def release(self, path, fh):
         return os.close(fh)
 
     def fsync(self, path, fdatasync, fh):
-        print("Fsync to", path)
-        # return self.flush(path, fh)
-        return cb[Constants.J_FULSH]({
-            'path': path, 
-            'fh': fh
-        })
-
+        return self.flush(path, fh)
 
 def main(mountpoint, root):
     FUSE(Passthrough(root), mountpoint, nothreads=True, foreground=True)
