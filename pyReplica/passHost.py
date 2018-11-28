@@ -12,7 +12,7 @@ from Journal import Journal
 import Constants
 
 from Callbacks import Callbacks as cb 
-
+import base64
 
 
 class Passthrough(Operations):
@@ -179,7 +179,7 @@ class Passthrough(Operations):
             'offset': offset,
             'path': path,
             'SEEK_SET':os.SEEK_SET,
-            'buf': buf,
+            'buf': base64.standard_b64encode(buf),
         })
 
     def truncate(self, path, length, fh=None):
@@ -197,7 +197,6 @@ class Passthrough(Operations):
         # use local call, because remote doesn't 
         # have same fd
         return os.fsync(fh)
-
 
     def release(self, path, fh):
         return os.close(fh)

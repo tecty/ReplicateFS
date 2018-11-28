@@ -2,7 +2,7 @@ import traceback
 import Constants
 import os 
 import json 
-
+import base64
 def get_full_path(partial):
     if partial.startswith("/"):
         partial = partial[1:]
@@ -92,16 +92,22 @@ def do_link(data):
     )
 def do_write(data):
     """
-    data['fh']
     data['offset']
     data['path']
     data['SEEK_SET']
     data['buf'] 
     """
-    os.lseek(data['fh'], data['offset'], data['SEEK_SET'])
     #! buf, fh may not be a string 
     dump_data(data)
-    return os.write(data['fh'], data['buf'])
+    # open the path, use only once and close 
+    fd = os.open(get_full_path(data['path']), os.O_WRONLY)
+    # seek to position and write 
+    os.lseek(fd, data['offset'], data['SEEK_SET'])
+    # store the result temporary 
+    res = os.write(fd, base64.standard_b64decode(data['buf']))
+    # close the obj 
+    os.close(fd)     
+    return res 
 def do_truncate(data):
     """
     data['path'] 
@@ -112,15 +118,6 @@ def do_truncate(data):
         return f.truncate(data['length'])
     return False
     
-def do_fulsh(data):
-    """
-    data['path']
-    data['fh']
-    """
-    #! the FH may not be the string
-    dump_data(data)
-    return os.fsync(data['fh'])
-
 # the mappings 
 Callbacks = {
     Constants.J_CHMOD: do_chmod,
