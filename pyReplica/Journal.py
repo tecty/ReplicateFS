@@ -2,6 +2,7 @@
 import time
 import json 
 import Constants
+from Callbacks import Callbacks as cb 
 
 def doJournal(journal,mount_path):
     '''
@@ -45,6 +46,11 @@ class Journal(object):
             'ops':self.ops,
             'data': self.data
         })
+
+    def sync(self):
+        # do callback
+        return cb[self.ops](self.data)
+        
         
 
 class JournalController(object):

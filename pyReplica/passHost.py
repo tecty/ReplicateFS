@@ -15,6 +15,24 @@ from Callbacks import Callbacks as cb
 import base64
 
 
+"""
+Rewrite the write callback, to gain little performance 
+"""
+def do_write_local(data):
+    # seek and write the data use local fd 
+    # this will boost the performance, because we don't have onetime 
+    # fd to modify the file 
+    os.lseek(data['fh'], data['offset'], data['SEEK_SET'])
+    return os.write(
+        data['fh'], 
+        base64.standard_b64decode(data['buf'])
+    )
+    
+cb[Constants.J_WRITE] = do_write_local
+
+
+
+
 class Passthrough(Operations):
     def __init__(self, root):
         # setup as a path constant in constant 
@@ -172,7 +190,6 @@ class Passthrough(Operations):
     def write(self, path, buf, offset, fh):
         # this should be more careful 
         print("Write to", path)
-        os.lseek(fh, offset, os.SEEK_SET)
         # return os.write(fh, buf)
         return cb[Constants.J_WRITE]({
             'fh': fh, 

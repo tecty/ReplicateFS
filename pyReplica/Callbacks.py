@@ -97,7 +97,6 @@ def do_write(data):
     data['SEEK_SET']
     data['buf'] 
     """
-    #! buf, fh may not be a string 
     dump_data(data)
     # open the path, use only once and close 
     fd = os.open(get_full_path(data['path']), os.O_WRONLY)
