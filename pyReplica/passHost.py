@@ -44,7 +44,7 @@ class Passthrough(Operations):
         full_path = self._full_path(path)
         print("full path is ", full_path)
         return cb[Constants.J_CHMOD]({
-            'path': path, 
+            'path': str(path), 
             'mode': mode
         })
         # return os.chmod(full_path, mode)
