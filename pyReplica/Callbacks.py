@@ -103,7 +103,10 @@ def do_write(data):
     # seek to position and write 
     os.lseek(fd, data['offset'], data['SEEK_SET'])
     # store the result temporary 
-    res = os.write(fd, base64.standard_b64decode(data['buf']))
+    res = os.write(
+        fd, 
+        base64.standard_b64decode(data['buf'])
+    )
     # close the obj 
     os.close(fd)     
     return res 

@@ -28,9 +28,7 @@ def do_write_local(data):
         base64.standard_b64decode(data['buf'])
     )
     
-cb[Constants.J_WRITE] = do_write_local
-
-
+cb[Constants.J_WRITE]= do_write_local
 
 
 class Passthrough(Operations):
@@ -63,20 +61,20 @@ class Passthrough(Operations):
         print("full path is ", full_path)
         
         # return os.chmod(full_path, mode)
-        return cb[Constants.J_CHMOD]({
+        return Journal(Constants.J_CHMOD,{
             'path': str(path), 
             'mode': mode
-        })
+        }).sync()
 
     def chown(self, path, uid, gid):
         print("Chown at", path, "uid:", uid, "gid", gid)
         # full_path = self._full_path(path)
         # return os.chown(full_path, uid, gid)
-        return cb[Constants.J_CHOWN]({
+        return Journal(Constants.J_CHOWN,{
             'path': str(path),
             'uid': uid,
             'gid': gid
-        })
+        }).sync()
 
 
     def getattr(self, path, fh=None):
@@ -106,27 +104,27 @@ class Passthrough(Operations):
         # path = self._full_path(path)
         print("Mknod at ",path)
         # return os.mknod(path, mode, dev)
-        return cb[Constants.J_MKNOD]({
+        return Journal(Constants.J_MKNOD,{
             'path': path,
             'mode': mode,
             'dev': dev 
-        })
+        }).sync()
 
     def rmdir(self, path):
         path = self._full_path(path)
         print("Rmdir at ",path)
         # return os.rmdir(path)
-        return cb[Constants.J_RMDIR]({
+        return Journal(Constants.J_RMDIR,{
             'path': str(path)
-        })
+        }).sync()
 
     def mkdir(self, path, mode):
         print("Mkdir at ",path)
         # return os.mkdir(self._full_path(path), mode)
-        return cb[Constants.J_MKDIR]({
+        return Journal(Constants.J_MKDIR,{
             'path': path,
             'mode': mode
-        })
+        }).sync()
 
     def statfs(self, path):
         full_path = self._full_path(path)
@@ -138,9 +136,9 @@ class Passthrough(Operations):
     def unlink(self, path):
         print("Unlink from",path)
         # return os.unlink(self._full_path(path))
-        return cb[Constants.J_UNLINK]({
+        return Journal(Constants.J_UNLINK,{
             'path':path
-        })
+        }).sync()
 
     def symlink(self, name, target):
         """
@@ -148,26 +146,26 @@ class Passthrough(Operations):
         """
         print("Symlink from", name, " to ", target)
         # return os.symlink(name, self._full_path(target))
-        return cb[Constants.J_SYMLINK]({
+        return Journal(Constants.J_SYMLINK,{
             'src': str(name),
             'dest': str(target)
-        })
+        }).sync()
 
     def rename(self, old, new):
         print("Rename from", old, " to ", new)
         # return os.rename(self._full_path(old), self._full_path(new))
-        return cb[Constants.J_RENAME]({
+        return Journal(Constants.J_RENAME,{
             'old': str(old),
             'new': str(new)
-        })
+        }).sync()
 
     def link(self, target, name):
         print("Link to", target)
         # return os.link(self._full_path(target), self._full_path(name))
-        return cb[Constants.J_LINK]({
+        return Journal(Constants.J_LINK,{
             'name': name, 
             'target': target
-        })
+        }).sync()
 
     def utimens(self, path, times=None):
         return os.utime(self._full_path(path), times)
@@ -191,23 +189,23 @@ class Passthrough(Operations):
         # this should be more careful 
         print("Write to", path)
         # return os.write(fh, buf)
-        return cb[Constants.J_WRITE]({
+        return Journal(Constants.J_WRITE,{
             'fh': fh, 
             'offset': offset,
             'path': path,
             'SEEK_SET':os.SEEK_SET,
             'buf': base64.standard_b64encode(buf),
-        })
+        }).sync()
 
     def truncate(self, path, length, fh=None):
         print("Truncate to", path)
         # full_path = self._full_path(path)
         # with open(full_path, 'r+') as f:
         #     f.truncate(length)
-        return cb[Constants.J_TRUNCATE]({
+        return Journal(Constants.J_TRUNCATE,{
             'path': path,
             'length': length
-        })
+        }).sync()
 
 
     def flush(self, path, fh):
